@@ -52,8 +52,7 @@ class TransformerEncoder(EncoderDecoder.Encoder):
         self.attention_weights = [None] * len(self.blks)
         for i, blk in enumerate(self.blks):
             X = blk(X, valid_lens)
-            self.attention_weights[
-                i] = blk.attention.attention.attention_weights
+            self.attention_weights[i] = blk.attention.attention.attention_weights
         return X
 
 class DecoderBlock(nn.Module):

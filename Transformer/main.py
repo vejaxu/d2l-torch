@@ -32,7 +32,7 @@ decoder = Transformer.TransformerDecoder(
     num_layers, dropout)
 net = EncoderDecoder.EncoderDecoder(encoder, decoder)
 
-def train_seq2seq(net, data_iter, lr, num_epochs, tgt_vocab, device):
+def train(net, data_iter, lr, num_epochs, tgt_vocab, device):
     """训练序列到序列模型"""
     def xavier_init_weights(m):
         if type(m) == nn.Linear:
@@ -68,16 +68,14 @@ def train_seq2seq(net, data_iter, lr, num_epochs, tgt_vocab, device):
                 metric.add(l.sum(), num_tokens)
         if (epoch + 1) % 10 == 0:
             animator.add(epoch + 1, (metric[0] / metric[1],))
-    print(f'loss {metric[0] / metric[1]:.3f}, {metric[1] / timer.stop():.1f} '
-        f'tokens/sec on {str(device)}')
+        print(f'{epoch}', f'loss {metric[0] / metric[1]:.3f}, {metric[1] / timer.stop():.1f} ', f'tokens/sec on {str(device)}')
 
 
-if __name__ == '__main__':
-    train_seq2seq(net, train_iter, lr, num_epochs, tgt_vocab, device)
-    engs = ['go .', "i lost .", 'he\'s calm .', 'i\'m home .']
+train(net, train_iter, lr, num_epochs, tgt_vocab, device)
+"""     engs = ['go .', "i lost .", 'he\'s calm .', 'i\'m home .']
     fras = ['va !', 'j\'ai perdu .', 'il est calme .', 'je suis chez moi .']
     for eng, fra in zip(engs, fras):
         translation, dec_attention_weight_seq = d2l.predict_seq2seq(
             net, eng, src_vocab, tgt_vocab, num_steps, device, True)
         print(f'{eng} => {translation}, ',
-                f'bleu {d2l.bleu(translation, fra, k=2):.3f}')
+                f'bleu {d2l.bleu(translation, fra, k=2):.3f}') """

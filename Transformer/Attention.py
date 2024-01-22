@@ -6,8 +6,7 @@ import math
 def sequence_mask(X, valid_len, value=0):
     """在序列中屏蔽不相关的项"""
     maxlen = X.size(1)
-    mask = torch.arange((maxlen), dtype=torch.float32,
-                        device=X.device)[None, :] < valid_len[:, None]
+    mask = torch.arange((maxlen), dtype=torch.float32,device=X.device)[None, :] < valid_len[:, None]
     X[~mask] = value
     return X
 
@@ -24,8 +23,7 @@ def masked_softmax(X, valid_lens):
         else:
             valid_lens = valid_lens.reshape(-1)
         # 最后一轴上被掩蔽的元素使用一个非常大的负值替换，从而其softmax输出为0
-        X = sequence_mask(X.reshape(-1, shape[-1]), valid_lens,
-                              value=-1e6)
+        X = sequence_mask(X.reshape(-1, shape[-1]), valid_lens, value=-1e6)
         return nn.functional.softmax(X.reshape(shape), dim=-1)
 
 
