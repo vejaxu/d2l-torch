@@ -1,10 +1,11 @@
+import math
 import torch
 from torch import nn 
-import math
 
-#@save
+
 def sequence_mask(X, valid_len, value=0):
     """在序列中屏蔽不相关的项"""
+    # X shape (batch_size, max_len)
     maxlen = X.size(1)
     mask = torch.arange((maxlen), dtype=torch.float32,device=X.device)[None, :] < valid_len[:, None]
     X[~mask] = value
@@ -39,8 +40,7 @@ class DotProductAttention(nn.Module):
     # valid_lens的形状:(batch_size，)或者(batch_size，查询的个数)
     def forward(self, queries, keys, values, valid_lens=None):
         d = queries.shape[-1]
-        # 设置transpose_b=True为了交换keys的最后两个维度
-        scores = torch.bmm(queries, keys.transpose(1,2)) / math.sqrt(d)
+        scores = torch.bmm(queries, keys.transpose(1,2)) / math.sqrt(d) # Q * K.T / sqrt(d), 使用bmm是因为有batch_size
         self.attention_weights = masked_softmax(scores, valid_lens)
         return torch.bmm(self.dropout(self.attention_weights), values)
     
@@ -56,7 +56,9 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
 
     def forward(self, queries, keys, values, valid_lens):
-
+        # queries shape (batch_size, num_steps, query_size)
+        # self.W_q shape (batch_size, num_steps, hidden_size)
+        # transpose shape (batch_size * num_heads, num_steps, hidden_size / num_heads)
         queries = transpose_qkv(self.W_q(queries), self.num_heads)
         keys = transpose_qkv(self.W_k(keys), self.num_heads)
         values = transpose_qkv(self.W_v(values), self.num_heads)
@@ -67,33 +69,36 @@ class MultiHeadAttention(nn.Module):
             valid_lens = torch.repeat_interleave(
                 valid_lens, repeats=self.num_heads, dim=0)
 
-        # output的形状:(batch_size*num_heads，查询的个数，
-        # num_hiddens/num_heads)
+        # output shape (batch_size * num_heads, num_steps, hidden_size / num_heads)
         output = self.attention(queries, keys, values, valid_lens)
 
-        # output_concat的形状:(batch_size，查询的个数，num_hiddens)
         output_concat = transpose_output(output, self.num_heads)
         return self.W_o(output_concat)
 
+
 def transpose_qkv(X, num_heads):
     """为了多注意力头的并行计算而变换形状"""
-    # 输入X的形状:(batch_size，查询或者“键－值”对的个数，num_hiddens)
-    # 输出X的形状:(batch_size，查询或者“键－值”对的个数，num_heads，
-    # num_hiddens/num_heads)
+    # X shape (batch_size, num_steps, hidden_size)
+    
     X = X.reshape(X.shape[0], X.shape[1], num_heads, -1)
+    # X shape (batch_size, num_steps, num_heads, hidden_size / num_heads)
 
-    # 输出X的形状:(batch_size，num_heads，查询或者“键－值”对的个数,
-    # num_hiddens/num_heads)
     X = X.permute(0, 2, 1, 3)
+    # X shape (batch_size, num_heads, num_steps, hidden_size / num_heads)
 
-    # 最终输出的形状:(batch_size*num_heads,查询或者“键－值”对的个数,
-    # num_hiddens/num_heads)
     return X.reshape(-1, X.shape[2], X.shape[3])
+    # X shape (batch_size * num_heads, num_steps, hidden_size / num_heads)
 
 
-#@save
 def transpose_output(X, num_heads):
     """逆转transpose_qkv函数的操作"""
+    # X shape (batch_size * num_heads, num_steps, hidden_size / num_heads)
+    
     X = X.reshape(-1, num_heads, X.shape[1], X.shape[2])
+    # X shape (batch_size, num_heads, num_steps, hidden_size / num_heads)
+    
     X = X.permute(0, 2, 1, 3)
+    # X shape (batch_size, num_steps, num_heads, hidden_size / num_heads)
+    
     return X.reshape(X.shape[0], X.shape[1], -1)
+    # X shape (batch_size, num_steps, hidden_size)
