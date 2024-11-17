@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+
 class Encoder(nn.Module):
     def __init__(self, **kwargs):
         super(Encoder, self).__init__(**kwargs)
@@ -16,6 +17,8 @@ class Decoder(nn.Module):
 
     def forward(self, X, state):
         raise NotImplementedError
+    
+
 class EncoderDecoder(nn.Module):
     def __init__(self, encoder, decoder, **kwargs):
         super(EncoderDecoder, self).__init__(**kwargs)
