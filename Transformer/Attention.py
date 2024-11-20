@@ -42,9 +42,9 @@ class DotProductAttention(nn.Module):
         d = queries.shape[-1]
         scores = torch.bmm(queries, keys.transpose(1,2)) / math.sqrt(d) # Q * K.T / sqrt(d), 使用bmm是因为有batch_size
         self.attention_weights = masked_softmax(scores, valid_lens)
-        return torch.bmm(self.dropout(self.attention_weights), values)
+        return torch.bmm(self.dropout(self.attention_weights), values) 
     
-
+    
 class MultiHeadAttention(nn.Module):
     def __init__(self, key_size, query_size, value_size, num_hiddens, num_heads, dropout, bias=False, **kwargs):
         super(MultiHeadAttention, self).__init__(**kwargs)
