@@ -6,8 +6,9 @@ from torch import nn
 def sequence_mask(X, valid_len, value=0):
     """在序列中屏蔽不相关的项"""
     # X shape (batch_size, max_len)
+    # 实际使用过程中，只保留最后一个维度，其余维度都保存在第0个维度中，只对特征维度进行操作
     maxlen = X.size(1)
-    mask = torch.arange((maxlen), dtype=torch.float32,device=X.device)[None, :] < valid_len[:, None]
+    mask = torch.arange((maxlen), dtype=torch.float32, device=X.device)[None, :] < valid_len[:, None]
     X[~mask] = value
     return X
 

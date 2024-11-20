@@ -14,7 +14,7 @@ def try_gpu():
         return torch.device('cpu')
 
 
-num_hiddens, num_layers, dropout, batch_size, num_steps = 32, 2, 0.1, 64, 10
+hidden_size, num_layers, dropout, batch_size, num_steps = 32, 2, 0.1, 64, 10
 lr, num_epochs, device = 0.005, 200, try_gpu()
 ffn_num_input, ffn_num_hiddens, num_heads = 32, 64, 4
 key_size, query_size, value_size = 32, 32, 32
@@ -23,11 +23,11 @@ norm_shape = [32]
 train_iter, src_vocab, tgt_vocab = Data.load_data_nmt(batch_size, num_steps)
 
 encoder = Transformer.TransformerEncoder(
-    len(src_vocab), key_size, query_size, value_size, num_hiddens,
+    len(src_vocab), key_size, query_size, value_size, hidden_size,
     norm_shape, ffn_num_input, ffn_num_hiddens, num_heads,
     num_layers, dropout)
 decoder = Transformer.TransformerDecoder(
-    len(tgt_vocab), key_size, query_size, value_size, num_hiddens,
+    len(tgt_vocab), key_size, query_size, value_size, hidden_size,
     norm_shape, ffn_num_input, ffn_num_hiddens, num_heads,
     num_layers, dropout)
 net = EncoderDecoder.EncoderDecoder(encoder, decoder)
