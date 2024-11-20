@@ -5,7 +5,6 @@ import Transformer
 import Data
 import EncoderDecoder
 import loss_model
-import pandas as pd
 
 
 def try_gpu():

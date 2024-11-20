@@ -9,6 +9,9 @@ from FFN import PositionWiseFFN
 import EncoderDecoder
 from AttentionDecoder import AttentionDecoder
 
+""" from AddNorm import addnorm
+from FFN import ffn """
+
 
 class EncoderBlock(nn.Module):
     """Transformer编码器块"""
@@ -22,6 +25,19 @@ class EncoderBlock(nn.Module):
     def forward(self, X, valid_lens):
         Y = self.addnorm1(X, self.attention(X, X, X, valid_lens))
         return self.addnorm2(Y, self.ffn(Y))
+    
+    
+""" class encoderblock(nn.Module):
+    def __init__(self, querysize, keysize, valuesize, hiddensize, num_heads, normshape, ffn_input, ffn_hidden, dropout) -> None:
+        super().__init__()
+        self.attention = MultiHeadAttention(keysize, querysize, valuesize, hiddensize, num_heads, dropout)
+        self.addnorm1 = addnorm(normshape, dropout)
+        self.ffn = ffn(ffn_input, ffn_hidden, hiddensize)
+        self.addnorm2 = addnorm(normshape, dropout)
+        
+    def forward(self, x, valid_lens):
+        y = self.addnorm1(x, self.attention(x, x, x, valid_lens))
+        return self.addnorm(y, self.ffn(x)) """
 
 
 class TransformerEncoder(EncoderDecoder.Encoder):
