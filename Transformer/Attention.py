@@ -13,6 +13,13 @@ def sequence_mask(X, valid_len, value=0):
     return X
 
 
+""" def seq_mask(x, valid_len, value=0):
+    maxlen = x.size(1)
+    mask = torch.arange((maxlen), dtype=torch.float32, device=x.device)[None, :] < valid_len[:, None]
+    x[~mask] = value
+    return x """
+
+
 def masked_softmax(X, valid_lens):
     """通过在最后一个轴上掩蔽元素来执行softmax操作"""
     # X:3D张量，valid_lens:1D或2D张量
@@ -103,3 +110,21 @@ def transpose_output(X, num_heads):
     
     return X.reshape(X.shape[0], X.shape[1], -1)
     # X shape (batch_size, num_steps, hidden_size)
+    
+
+""" def transpose_qkv(x, num_heads):
+    x = x.reshape(x.shape[0], x.shape[1], num_heads, -1)
+    
+    x = x.permute(0, 2, 1, 3)
+    
+    x = x.reshape(-1, x.shape[2], x.shape[3])
+    
+
+def transpose_output(x, num_heads):
+    x = x.reshape(-1, num_heads, x.shape[1], x.shape[2])
+    
+    x = x.permute(0, 2, 1, 3)
+    
+    x = x.reshape(x.shape[0], x.shape[1], -1)
+    
+    return x """
